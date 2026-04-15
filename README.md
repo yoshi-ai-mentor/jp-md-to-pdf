@@ -5,13 +5,13 @@
 [![weasyprint 68.1](https://img.shields.io/badge/weasyprint-68.1-brightgreen.svg)](https://weasyprint.org/)
 ![AI Coding Skill](https://img.shields.io/badge/AI%20Coding%20Tool-skill-8A2BE2.svg)
 
-日本語 Markdown を A4 PDF に変換する、Claude Code / GitHub Copilot CLI 向けのローカル skill。
+日本語 Markdown を A4 PDF に変換する、AI コーディングツール向けのローカル skill。
 
 **weasyprint + BIZ UDPGothic + Noto Sans CJK JP** で動くので、sandbox でも root 権限なしで日本語 PDF が出せる。履歴書・職務経歴書・提案書・note 記事・顧客向け資料・請求書・レポート・スライドなど、日本語ドキュメントの PDF 化をワンコマンドで済ませるのが目的。
 
 ## これは何？
 
-このリポジトリは、AI コーディングツールから `scripts/convert.py` を呼んで、日本語 Markdown をそのまま A4 PDF に仕上げるためのローカル skill / utility。
+このリポジトリは、AI コーディングツール（Claude Code / Copilot CLI / Cursor / Codex CLI など）から `scripts/convert.py` を呼んで、日本語 Markdown をそのまま A4 PDF に仕上げるためのローカル skill / utility。
 
 - 8つのプリセット（履歴書/提案書/レポート/note/請求書/小説/スライド/16:9スライド）を `--preset` 一発で切替
 - 表紙ページの自動生成
@@ -50,6 +50,8 @@ A4横向き。Markdown の `---` をスライド区切りに変換。勉強会�
 
 ## インストール
 
+このスキルは Claude Code / Copilot CLI / Cursor / Codex CLI など、`scripts/convert.py` を呼べる任意の AI コーディングツールで動く。
+
 ### Claude Code で使う
 
 Claude Code のセッション内で以下を指示する:
@@ -58,9 +60,9 @@ Claude Code のセッション内で以下を指示する:
 
 Claude が `~/.claude/skills/jp-md-to-pdf/` 配下にクローンして、依存関係を `setup_fonts.sh` で自動セットアップする。
 
-### GitHub Copilot CLI などから使う
+### その他の AI コーディングツールから使う
 
-Copilot CLI など、任意の AI コーディングツールから使う場合は、このリポジトリをローカルに clone して `scripts/convert.py` を呼ぶ。自然言語の入口はツール側に任せつつ、変換の本体はこのリポジトリで共通化する想定。
+任意の AI コーディングツールから使う場合は、このリポジトリをローカルに clone して `scripts/convert.py` を呼ぶ。自然言語の入口はツール側に任せつつ、変換の本体はこのリポジトリで共通化する想定。
 
 ### ローカルセットアップ
 
