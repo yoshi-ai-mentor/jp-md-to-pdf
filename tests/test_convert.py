@@ -50,6 +50,19 @@ def test_validate_font_size_accepts_point_values_only():
         convert.validate_font_size('10px')
 
 
+def test_validate_page_size_accepts_a4_landscape_and_mm():
+    assert convert.validate_page_size('A4 landscape') == 'A4 landscape'
+    assert convert.validate_page_size('  338mm 190mm landscape  ') == '338mm 190mm landscape'
+    assert convert.validate_page_size('33.8cm 19cm') == '33.8cm 19cm'
+
+
+def test_validate_page_size_rejects_injection():
+    with pytest.raises(ValueError, match='--page-size'):
+        convert.validate_page_size('338mm 190mm; @import url(x)')
+    with pytest.raises(ValueError, match='--page-size'):
+        convert.validate_page_size('11in 8.5in')
+
+
 def test_validate_font_arg_allows_safe_custom_family():
     font = "'Hiragino Sans', sans-serif"
 

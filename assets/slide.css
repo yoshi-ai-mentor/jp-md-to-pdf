@@ -1,10 +1,10 @@
-/* slide.css — A4横向きスライドスタイル
+/* slide.css — 横向きスライドスタイル（@page size は {{PAGE_SIZE}} で可変）
  * Markdown の `---` (hr) を改ページとして使い、各ブロックを1スライドにする想定。
- * テンプレート変数: {{MARGIN}} {{FONT_SIZE}} {{FONT_FAMILY}}
+ * テンプレート変数: {{MARGIN}} {{FONT_SIZE}} {{FONT_FAMILY}} {{PAGE_SIZE}}
  */
 
 @page {
-  size: A4 landscape;
+  size: {{PAGE_SIZE}};
   margin: {{MARGIN}};
   @bottom-right {
     content: counter(page);

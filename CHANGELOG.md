@@ -5,6 +5,14 @@ All notable changes to **jp-md-to-pdf** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/ja/).
 
+## [1.3.0] - 2026-04-15
+
+### Added
+
+- **`slide-16x9` プリセット**（`assets/presets.json`）: 16:9 相当の 338mm × 190mm（横向き）。プロジェクタ・モニター向けスライド
+- **`--page-size`**: `--style slide` 時に `@page size` を指定（例: `A4 landscape`、`338mm 190mm landscape`）。`validate_page_size()` で mm/cm 形式と `A4 landscape` のみ許可し CSS インジェクションを防止
+- **`assets/slide.css`**: `@page` の `size` を `{{PAGE_SIZE}}` プレースホルダ化（未指定時は従来どおり `A4 landscape`）
+
 ## [1.2.0] - 2026-04-15
 
 ### Added

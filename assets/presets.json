@@ -51,6 +51,15 @@
     "margin": "15mm 20mm",
     "font_size": "16pt",
     "font": "biz-ud",
-    "style": "slide"
+    "style": "slide",
+    "page_size": "A4 landscape"
+  },
+  "slide-16x9": {
+    "description": "16:9 スライド（338×190mm 相当。プロジェクタ・モニター向け。--- で区切り）",
+    "margin": "12mm 18mm",
+    "font_size": "16pt",
+    "font": "biz-ud",
+    "style": "slide",
+    "page_size": "338mm 190mm landscape"
   }
 }

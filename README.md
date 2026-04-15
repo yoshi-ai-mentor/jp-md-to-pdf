@@ -13,7 +13,7 @@
 
 このリポジトリは、AI コーディングツールから `scripts/convert.py` を呼んで、日本語 Markdown をそのまま A4 PDF に仕上げるためのローカル skill / utility。
 
-- 7つのプリセット（履歴書/提案書/レポート/note/請求書/小説/スライド）を `--preset` 一発で切替
+- 8つのプリセット（履歴書/提案書/レポート/note/請求書/小説/スライド/16:9スライド）を `--preset` 一発で切替
 - 表紙ページの自動生成
 - A4横向きスライド（`---` で改ページ）
 - raw HTML は既定でエスケープ
@@ -122,6 +122,12 @@ python3 scripts/convert.py -i proposal.md -o proposal.pdf \
 # A4横スライド
 python3 scripts/convert.py -i deck.md -o deck.pdf --preset slide \
   --cover-title "AIコーディングツール導入ガイド"
+
+# 16:9 スライド（PowerPoint 標準に近い 338×190mm）
+python3 scripts/convert.py -i samples/06_slide_remote_work.md -o /tmp/slide_16x9.pdf \
+  --preset slide-16x9 \
+  --cover-title "リモートワーク導入ガイド" \
+  --cover-logo samples/sample_logo.svg
 ```
 
 ## 依存
@@ -144,8 +150,11 @@ python3 scripts/convert.py -i deck.md -o deck.pdf --preset slide \
 | `invoice` | 請求書・見積書 |
 | `minimal` | 小説・エッセイ（最小装飾）|
 | `slide` | A4横スライド（`---` で改ページ）|
+| `slide-16x9` | 16:9 相当（338×190mm・横向き。投影・モニター向け）|
 
 `--list-presets` で詳細一覧が見られる。
+
+スライドの用紙サイズは `--page-size` で上書きできる（`--style slide` または slide 系プリセット時のみ）。例: `--page-size "338mm 190mm landscape"`。
 
 ## サンプル
 
@@ -155,6 +164,7 @@ python3 scripts/convert.py -i deck.md -o deck.pdf --preset slide \
 python3 scripts/convert.py -i samples/01_resume_sample.md -o samples/output/01_resume.pdf --preset resume
 python3 scripts/convert.py -i samples/02_proposal_sample.md -o samples/output/02_proposal.pdf --preset proposal --cover-title "業務フロー改善提案書"
 python3 scripts/convert.py -i samples/03_slide_sample.md -o samples/output/03_slide.pdf --preset slide --cover-title "AIコーディングツール導入ガイド"
+python3 scripts/convert.py -i samples/06_slide_remote_work.md -o samples/output/06_slide_16x9.pdf --preset slide-16x9 --cover-title "リモートワーク導入ガイド" --cover-logo samples/sample_logo.svg
 ```
 
 ## カスタマイズ

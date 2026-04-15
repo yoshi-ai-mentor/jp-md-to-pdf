@@ -37,6 +37,16 @@ SAFE_MARGIN_RE = re.compile(
     r'(?:\s+(?:0|(?:\d+(?:\.\d+)?)(?:mm|cm|in|pt|px))){0,3}\s*$'
 )
 SAFE_FONT_SIZE_RE = re.compile(r'^\s*(?:[6-9](?:\.\d+)?|[1-2]\d(?:\.\d+)?)pt\s*$')
+# slide の @page size: A4 名義、または mm/cm 二辺（任意で landscape）。CSS インジェクション防止のため厳しめ。
+SAFE_PAGE_SIZE_RE = re.compile(
+    r'^\s*(?:'
+    r'A4\s+landscape'
+    r'|'
+    r'(?:\d+(?:\.\d+)?mm)\s+(?:\d+(?:\.\d+)?mm)(?:\s+landscape)?'
+    r'|'
+    r'(?:\d+(?:\.\d+)?cm)\s+(?:\d+(?:\.\d+)?cm)(?:\s+landscape)?'
+    r')\s*$'
+)
 DISALLOWED_FONT_CHARS = set(';:{}[]()<>@/\\\n\r\t')
 MAX_INPUT_BYTES = 2 * 1024 * 1024
 MAX_CUSTOM_CSS_BYTES = 256 * 1024
@@ -113,6 +123,17 @@ def validate_font_size(font_size: str) -> str:
     normalized = font_size.strip()
     if not SAFE_FONT_SIZE_RE.match(normalized):
         raise ValueError('--font-size は pt 指定だけ使える（例: 10pt）')
+    return normalized
+
+
+def validate_page_size(page_size: str) -> str:
+    """slide 用 @page size のみ。mm/cm の長さか A4 landscape。セミコロン等は拒否。"""
+    normalized = page_size.strip()
+    if not SAFE_PAGE_SIZE_RE.match(normalized):
+        raise ValueError(
+            '--page-size は "A4 landscape"、または "338mm 190mm" / "33.8cm 19cm" のように '
+            '幅と高さを同じ単位(mm か cm)で2つ、必要なら末尾に landscape だけ使える'
+        )
     return normalized
 
 
@@ -753,14 +774,15 @@ pre code {{
 
 
 def load_css(custom_css_path: str, margin: str, font_size: str, font_family: str,
-             style: str = 'plain') -> str:
+             style: str = 'plain', page_size: Optional[str] = None) -> str:
     """カスタムCSSが指定されていればそれを、なければアセットのCSSを、それも無ければ組込みデフォルトを返す。
 
     style パラメータで選ぶアセット:
       - 'plain'     → assets/default.css
       - 'graphical' → assets/graphical.css (カラーアクセント・カード・ボックス強調)
 
-    アセットのCSS内の `{{MARGIN}}` `{{FONT_SIZE}}` `{{FONT_FAMILY}}` プレースホルダは置換する。
+    アセットのCSS内の `{{MARGIN}}` `{{FONT_SIZE}}` `{{FONT_FAMILY}}` `{{PAGE_SIZE}}` プレースホルダは置換する。
+    slide 系では page_size 未指定時は `A4 landscape` を入れる。
     """
     if custom_css_path:
         return Path(custom_css_path).read_text(encoding='utf-8')
@@ -776,11 +798,13 @@ def load_css(custom_css_path: str, margin: str, font_size: str, font_family: str
 
     if asset_path.exists():
         template = asset_path.read_text(encoding='utf-8')
+        resolved_page = page_size if page_size is not None else 'A4 landscape'
         # テンプレート変数の置換
         return (template
                 .replace('{{MARGIN}}', margin)
                 .replace('{{FONT_SIZE}}', font_size)
-                .replace('{{FONT_FAMILY}}', font_family))
+                .replace('{{FONT_FAMILY}}', font_family)
+                .replace('{{PAGE_SIZE}}', resolved_page))
 
     # フォールバック: 組込みCSSを使う（plain相当）
     return build_default_css(margin=margin, font_size=font_size, font_family=font_family)
@@ -803,6 +827,7 @@ def generate_pdf(
     cover_logo: str = None,
     allow_http: bool = False,
     allow_local: bool = False,
+    page_size: Optional[str] = None,
 ) -> int:
     """MD → PDF 変換の本体。生成された PDF のページ数を返す。"""
     from weasyprint import CSS
@@ -820,7 +845,9 @@ def generate_pdf(
         css_content = ''
         custom_stylesheets = [CSS(filename=custom_css)]
     else:
-        css_content = load_css(custom_css, margin, font_size, font_family, style=style)
+        css_content = load_css(
+            custom_css, margin, font_size, font_family, style=style, page_size=page_size,
+        )
     html = build_html(
         md_content, css_content,
         page_breaks=page_breaks, title=title, style=style,
@@ -877,6 +904,10 @@ def main():
   python3 convert.py -i deck.md -o deck.pdf --preset slide \\
     --cover-title "AIコーディングツール導入ガイド"
 
+  # 16:9 スライド（338×190mm）
+  python3 convert.py -i deck.md -o deck.pdf --preset slide-16x9 \\
+    --cover-title "題目"
+
   # プリセットを使わず手動指定
   python3 convert.py -i doc.md -o doc.pdf --margin "15mm 12mm" --font-size 10.5pt
 
@@ -902,6 +933,8 @@ def main():
     parser.add_argument('--style', default=None, choices=['plain', 'graphical', 'slide'],
                         help=('デザインスタイル。plain (モノトーン) / '
                               'graphical (カラーアクセント・カード) / slide (A4横スライド)'))
+    parser.add_argument('--page-size', default=None, dest='page_size',
+                        help='slide 用の用紙サイズ（@page size）。例: "A4 landscape" / "338mm 190mm landscape"')
     parser.add_argument('--page-break-before', action='append', default=[],
                         help='この文字列の直前で改ページ（複数指定可）')
     parser.add_argument('--css', help='カスタム CSS ファイルで見た目を完全上書き')
@@ -937,11 +970,18 @@ def main():
             print(f"エラー: {e}", file=sys.stderr)
             sys.exit(1)
     fill_defaults(args)
+    # slide 系で page_size 未指定なら従来どおり A4 横
+    if args.page_size is None and args.style == 'slide':
+        args.page_size = 'A4 landscape'
     try:
         args.margin = validate_margin(args.margin)
         args.font_size = validate_font_size(args.font_size)
         args.font = validate_font_arg(args.font)
         args.css = validate_css_path(args.css)
+        if args.page_size is not None:
+            if args.style != 'slide':
+                raise ValueError('--page-size は --style slide のときだけ使える')
+            args.page_size = validate_page_size(args.page_size)
         args.title = validate_text_option('--title', args.title)
         args.cover_title = validate_text_option('--cover-title', args.cover_title)
         args.cover_subtitle = validate_text_option('--cover-subtitle', args.cover_subtitle)
@@ -985,6 +1025,7 @@ def main():
             cover_logo=args.cover_logo,
             allow_http=args.allow_http,
             allow_local=args.allow_local,
+            page_size=args.page_size,
         )
     except ImportError as e:
         print(

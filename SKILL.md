@@ -1,6 +1,6 @@
 ---
 name: jp-md-to-pdf
-description: 日本語 Markdown を A4 PDF に変換する。履歴書・職務経歴書・提案書・note 記事・顧客向け資料・請求書・レポート・スライド/デッキなど、**日本語ドキュメントの PDF 化を頼まれたら必ずこのスキルを使う**。「この MD を PDF にして」「職務経歴書 PDF」「提案書を PDF で」「日本語の資料を PDF にしたい」「A4 で出力」「A4 横でスライドを PDF に」「デッキを PDF 化」「表紙付きで PDF」「カバーページを付けて PDF」「表紙にロゴを載せて PDF」などの依頼が来たら発動すること。ユーザーが明示的に「PDF」と言わなくても、印刷や納品・配布を前提とした日本語ドキュメント（履歴書・提案書・スライド資料・請求書など）を整形する文脈であれば積極的に使う。weasyprint + BIZ UDPGothic / Noto Sans CJK JP で動くので sandbox でも root 権限なしで日本語 PDF が出せるのが強み。プリセット（resume/proposal/report/note-article/invoice/minimal/slide）、表紙自動生成（--cover-* と --cover-logo）、A4横スライドモード（--style slide）に対応。
+description: 日本語 Markdown を A4 PDF に変換する。履歴書・職務経歴書・提案書・note 記事・顧客向け資料・請求書・レポート・スライド/デッキなど、**日本語ドキュメントの PDF 化を頼まれたら必ずこのスキルを使う**。「この MD を PDF にして」「職務経歴書 PDF」「提案書を PDF で」「日本語の資料を PDF にしたい」「A4 で出力」「A4 横でスライドを PDF に」「16:9 スライドを PDF」「デッキを PDF 化」「表紙付きで PDF」「カバーページを付けて PDF」「表紙にロゴを載せて PDF」などの依頼が来たら発動すること。ユーザーが明示的に「PDF」と言わなくても、印刷や納品・配布を前提とした日本語ドキュメント（履歴書・提案書・スライド資料・請求書など）を整形する文脈であれば積極的に使う。weasyprint + BIZ UDPGothic / Noto Sans CJK JP で動くので sandbox でも root 権限なしで日本語 PDF が出せるのが強み。プリセット（resume/proposal/report/note-article/invoice/minimal/slide/slide-16x9）、表紙自動生成（--cover-* と --cover-logo）、スライドモード（--style slide・`--page-size` で用紙サイズ指定可）に対応。
 ---
 
 # jp-md-to-pdf
@@ -63,6 +63,7 @@ python3 <skill_path>/scripts/convert.py \
 | `--font-size` | `10pt` | 本文フォントサイズ |
 | `--font` | `biz-ud` | フォント選択（下記プリセット表を参照。カスタムCSS文字列も可）|
 | `--style` | `plain` | デザインスタイル。`plain` / `graphical` / `slide` から選択 |
+| `--page-size` | （slide 時は未指定なら `A4 landscape`） | **slide 専用**。`@page size`。例: `A4 landscape` / `338mm 190mm landscape` |
 | `--page-break-before "文字列"` | なし | その文字列が出現する直前で改ページを挿入（複数指定可）|
 | `--css path/to/custom.css` | 組込みCSS | カスタム CSS で見た目を完全上書き（style指定より優先）|
 | `--title` | ファイル名 | PDF メタデータのタイトル |
@@ -86,7 +87,8 @@ python3 <skill_path>/scripts/convert.py \
 | `note-article` | 20mm 20mm | 11pt | plain | note記事のプリント版（ゆったり読み物）|
 | `invoice` | 15mm 15mm | 10pt | plain | 請求書・見積書 |
 | `minimal` | 25mm 20mm | 11pt | plain | 小説・エッセイ（最小装飾）|
-| `slide` | 15mm 20mm | 16pt | slide | A4横スライド（`---` で改ページ）|
+| `slide` | 15mm 20mm | 16pt | slide | A4横スライド（`---` で改ページ・既定 `A4 landscape`）|
+| `slide-16x9` | 12mm 18mm | 16pt | slide | 16:9 相当（338×190mm 横向き・投影向け）|
 
 **優先順位**: DEFAULTS < preset < CLI明示指定。`--preset report --margin 10mm` のように部分上書き可能。
 
