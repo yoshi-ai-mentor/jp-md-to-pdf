@@ -194,6 +194,10 @@ python3 scripts/convert.py -i samples/06_slide_remote_work.md -o samples/output/
 - 信頼できない Markdown / HTML / CSS をそのまま変換する用途は推奨しない
 - raw HTML は既定でエスケープされる
 - 外部 URL フェッチは既定で無効（必要なときだけ `--allow-http`。localhost / private network 宛ては許可しない）
+
+> [!WARNING]
+> `--allow-http` を有効にする場合は、信頼できる Markdown のみを変換すること。
+> 外部から受け取った Markdown をそのまま変換すると、埋め込みリソース経由での情報漏洩リスクがある。
 - ローカルファイル参照は既定で無効（必要なときだけ `--allow-local`。入力 Markdown と custom CSS のディレクトリ配下だけ許可）
 - **`--cover-logo` は上記とは別経路**。指定したローカル画像だけを表紙用に読み込み、PDF 内は base64 の data URI として埋め込む（`--allow-local` 不要）
 - 画像やローカル CSS を本文 Markdown から参照する場合は、入力ファイルと同じ作業ディレクトリ配下に必要な素材を置き、`--allow-local` で許可する
