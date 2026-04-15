@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/ja/).
 
 ## [1.1.0] - 2026-04-15
 
-公開前のセキュリティ hardening。
+セキュリティ強化。
 
 ### Changed
 
@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/ja/).
 
 ## [1.0.0] - 2026-04-14
 
-初回リリース。日本語 Markdown から A4 PDF への変換を、Claude Code / GitHub Copilot CLI などの AI コーディングツールから呼び出せる形で提供。
+初回リリース。日本語 Markdown から A4 PDF への変換を、AI コーディングツールから呼び出せる形で提供。
 
 ### Added
 
