@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Fonts（setup_fonts.sh でユーザー側にダウンロードする。リポジトリには含めない）
+assets/fonts/*.ttf
+assets/fonts/*.otf
+assets/fonts/*.ttc
+!assets/fonts/.gitkeep
+
+# 生成ログ
+*.log
+
+# Claude Code / Cowork の内部キャッシュ
+.claude-cache/
+
+# 配布時に含めないサンプル中間ファイル
+samples/output/
+samples/tmp/
+*.bak

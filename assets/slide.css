@@ -1,0 +1,244 @@
+/* slide.css — A4横向きスライドスタイル
+ * Markdown の `---` (hr) を改ページとして使い、各ブロックを1スライドにする想定。
+ * テンプレート変数: {{MARGIN}} {{FONT_SIZE}} {{FONT_FAMILY}}
+ */
+
+@page {
+  size: A4 landscape;
+  margin: {{MARGIN}};
+  @bottom-right {
+    content: counter(page);
+    font-family: {{FONT_FAMILY}};
+    font-size: 9pt;
+    color: #94a3b8;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.slide-mode {
+  font-family: {{FONT_FAMILY}};
+  font-size: {{FONT_SIZE}};
+  line-height: 1.7;
+  color: #1a1a1a;
+  background: #fff;
+}
+
+/* 各スライドの区切り: hr を「次スライドへ」として使う */
+hr {
+  border: none;
+  height: 0;
+  margin: 0;
+  page-break-after: always;
+  visibility: hidden;
+}
+
+/* 見出し */
+h1 {
+  font-size: 28pt;
+  font-weight: bold;
+  color: #1e3a5f;
+  border-bottom: 3px solid #1e3a5f;
+  padding-bottom: 8mm;
+  margin-bottom: 10mm;
+  letter-spacing: 2pt;
+  page-break-after: avoid;
+}
+
+h2 {
+  font-size: 22pt;
+  font-weight: bold;
+  color: #1e3a5f;
+  border-left: 8px solid #b45309;
+  padding: 2mm 0 2mm 6mm;
+  margin-top: 4mm;
+  margin-bottom: 6mm;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-size: 18pt;
+  font-weight: bold;
+  color: #334155;
+  border-bottom: 1px solid #b45309;
+  padding-bottom: 2mm;
+  margin-top: 4mm;
+  margin-bottom: 4mm;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-size: 15pt;
+  font-weight: bold;
+  color: #b45309;
+  margin-top: 3mm;
+  margin-bottom: 3mm;
+  page-break-after: avoid;
+}
+
+h4::before {
+  content: "■ ";
+}
+
+p {
+  margin-bottom: 4mm;
+  font-size: {{FONT_SIZE}};
+  line-height: 1.8;
+}
+
+ul, ol {
+  margin-left: 6mm;
+  padding-left: 5mm;
+  margin-bottom: 4mm;
+}
+
+li {
+  margin-bottom: 2mm;
+  line-height: 1.8;
+}
+
+li::marker {
+  color: #b45309;
+}
+
+/* 引用を大きめのカード風に（スライド映え用） */
+blockquote {
+  background: #f1f5f9;
+  border-left: 6px solid #b45309;
+  padding: 4mm 6mm;
+  margin: 4mm 0;
+  border-radius: 2mm;
+  font-style: italic;
+  color: #334155;
+}
+
+strong {
+  font-weight: bold;
+  color: #1e3a5f;
+}
+
+em {
+  color: #b45309;
+  font-style: normal;
+  font-weight: bold;
+}
+
+/* コード */
+code {
+  font-family: 'Menlo', 'Consolas', monospace;
+  background: #f1f5f9;
+  padding: 0.5mm 2mm;
+  border-radius: 1mm;
+  font-size: 0.85em;
+  color: #b45309;
+}
+
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 4mm 5mm;
+  border-radius: 2mm;
+  margin-bottom: 4mm;
+  overflow-x: auto;
+  font-size: 0.8em;
+  line-height: 1.6;
+}
+
+pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* テーブル */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 4mm;
+  font-size: calc({{FONT_SIZE}} * 0.85);
+  border-top: 2px solid #1e3a5f;
+  border-bottom: 2px solid #1e3a5f;
+}
+
+table th, table td {
+  border-bottom: 1px solid #cbd5e1;
+  padding: 2.5mm 4mm;
+  text-align: left;
+  vertical-align: top;
+}
+
+table th {
+  background: #f1f5f9;
+  color: #1e3a5f;
+  font-weight: bold;
+}
+
+table tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+/* ===== 表紙（横向きスライド用） ===== */
+.cover-page.cover-slide {
+  width: 100%;
+  min-height: 180mm;
+  padding: 20mm 30mm;
+  page-break-after: always;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2a4a73 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-page.cover-slide .cover-inner {
+  text-align: center;
+  max-width: 100%;
+}
+
+.cover-page.cover-slide .cover-title {
+  font-size: 40pt;
+  font-weight: bold;
+  color: #fff;
+  letter-spacing: 3pt;
+  margin-bottom: 10mm;
+  border: none;
+  padding: 0;
+  text-align: center;
+}
+
+.cover-page.cover-slide .cover-subtitle {
+  font-size: 20pt;
+  color: #fbbf24;
+  font-weight: normal;
+  margin-bottom: 20mm;
+  text-align: center;
+}
+
+.cover-page.cover-slide .cover-spacer {
+  height: 10mm;
+}
+
+.cover-page.cover-slide .cover-author,
+.cover-page.cover-slide .cover-date {
+  font-size: 14pt;
+  color: #e2e8f0;
+  margin-bottom: 2mm;
+  text-align: center;
+}
+
+/* 画像 */
+img {
+  max-width: 100%;
+  max-height: 140mm;
+  display: block;
+  margin: 4mm auto;
+}
+
+/* ページブレーク汎用 */
+.page-break {
+  page-break-before: always;
+}

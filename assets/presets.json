@@ -1,0 +1,56 @@
+{
+  "_meta": {
+    "description": "jp-md-to-pdf プリセット定義。--preset <name> で一括適用される",
+    "override_order": "default < preset < CLI明示指定",
+    "version": "1.0.0"
+  },
+  "resume": {
+    "description": "履歴書・職務経歴書（詰めて1-2枚に収めるスタイル）",
+    "margin": "5mm 4mm",
+    "font_size": "9pt",
+    "font": "biz-ud",
+    "style": "plain"
+  },
+  "proposal": {
+    "description": "顧客向け提案書（カラーアクセント入りフォーマル）",
+    "margin": "18mm 16mm",
+    "font_size": "10.5pt",
+    "font": "biz-ud",
+    "style": "graphical"
+  },
+  "report": {
+    "description": "分析レポート・調査資料（余白広め・読みやすさ重視）",
+    "margin": "18mm 16mm",
+    "font_size": "10.5pt",
+    "font": "biz-ud",
+    "style": "graphical"
+  },
+  "note-article": {
+    "description": "note記事のプリントアウト用（ゆったり読み物）",
+    "margin": "20mm 20mm",
+    "font_size": "11pt",
+    "font": "biz-ud",
+    "style": "plain"
+  },
+  "invoice": {
+    "description": "請求書・見積書（シンプルで硬いビジネス書類）",
+    "margin": "15mm 15mm",
+    "font_size": "10pt",
+    "font": "biz-ud",
+    "style": "plain"
+  },
+  "minimal": {
+    "description": "小説・エッセイ・読み物（最小装飾・高い読みやすさ）",
+    "margin": "25mm 20mm",
+    "font_size": "11pt",
+    "font": "biz-ud",
+    "style": "plain"
+  },
+  "slide": {
+    "description": "A4横スライド（勉強会・配布資料向け。--- でスライド区切り）",
+    "margin": "15mm 20mm",
+    "font_size": "16pt",
+    "font": "biz-ud",
+    "style": "slide"
+  }
+}

@@ -1,0 +1,374 @@
+/*
+ * graphical.css - jp-md-to-pdf: graphical モード用スタイル
+ *
+ * コンセプト:
+ *   - ノイズ排除・硬派な欧州レポート風。深紺 (#1e3a5f) 基調のモノトーン+1色
+ *   - h1/h2/h3 にカラーバーで階層を明示、blockquote はカード化して重要ブロック感
+ *   - バレット・リンク・strong をアクセント色に寄せて視覚ガイドを作る
+ *
+ * プレースホルダ:
+ *   {{MARGIN}}      → --margin 引数で注入
+ *   {{FONT_SIZE}}   → --font-size 引数で注入
+ *   {{FONT_FAMILY}} → --font 引数で注入
+ *
+ * カラーパレット:
+ *   --primary:       #1e3a5f (深紺)    — h1/h2/h3 バー、strong、リンク、見出し
+ *   --primary-deep:  #0f2744 (濃紺)    — h1 テキスト、強調枠
+ *   --accent:        #b45309 (琥珀茶)   — blockquote、warning 的な重要ブロック
+ *   --bg-soft:       #f1f5f9 (ブルーグレー淡) — h2 背景、blockquote 背景
+ *   --bg-table-head: #e2e8f0           — テーブルヘッダ
+ *   --line:          #cbd5e1 (薄グレー) — ボーダー、区切り線
+ *   --text:          #1a1a1a            — 本文
+ *   --text-mute:     #475569            — サブテキスト、キャプション
+ */
+
+@page {
+  size: A4;
+  margin: {{MARGIN}};
+  @bottom-center {
+    content: counter(page) " / " counter(pages);
+    font-family: {{FONT_FAMILY}};
+    font-size: 8pt;
+    color: #64748b;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: {{FONT_FAMILY}};
+  font-size: {{FONT_SIZE}};
+  line-height: 1.9;
+  color: #1a1a1a;
+  background: #fff;
+}
+
+.page-break {
+  page-break-before: always;
+}
+
+/* ─────────────────────────────────────────
+   見出し: h1 (ドキュメントタイトル)
+   ───────────────────────────────────────── */
+h1 {
+  font-size: 18pt;
+  font-weight: bold;
+  color: #0f2744;
+  text-align: center;
+  letter-spacing: 2pt;
+  margin-top: 2mm;
+  margin-bottom: 2mm;
+  padding-bottom: 3mm;
+  border-bottom: 3px double #1e3a5f;
+  position: relative;
+}
+
+h1::after {
+  content: "";
+  display: block;
+  width: 30mm;
+  height: 2px;
+  background: #b45309;
+  margin: 2mm auto 0;
+}
+
+h1 + p {
+  text-align: right;
+  font-size: 8.5pt;
+  color: #475569;
+  margin-bottom: 5mm;
+  padding-bottom: 2mm;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+/* ─────────────────────────────────────────
+   見出し: h2 (セクション)
+   ───────────────────────────────────────── */
+h2 {
+  font-size: 12pt;
+  font-weight: bold;
+  color: #0f2744;
+  background: linear-gradient(to right, #f1f5f9 0%, #f8fafc 70%, #ffffff 100%);
+  border-left: 5px solid #1e3a5f;
+  padding: 2mm 4mm 2mm 4mm;
+  margin-top: 6mm;
+  margin-bottom: 3mm;
+  page-break-after: avoid;
+  letter-spacing: 0.5pt;
+}
+
+/* h1 直後の h2 は間隔詰める */
+h1 + h2, h1 + p + h2 {
+  margin-top: 3mm;
+}
+
+/* ─────────────────────────────────────────
+   見出し: h3 (サブセクション)
+   ───────────────────────────────────────── */
+h3 {
+  font-size: 10.5pt;
+  font-weight: bold;
+  color: #1e3a5f;
+  border-left: 3px solid #1e3a5f;
+  border-bottom: 1px solid #cbd5e1;
+  padding: 0.5mm 0 1mm 3mm;
+  margin-top: 4mm;
+  margin-bottom: 2mm;
+  page-break-after: avoid;
+}
+
+/* ─────────────────────────────────────────
+   見出し: h4 (小見出し)
+   ───────────────────────────────────────── */
+h4 {
+  font-size: 9.5pt;
+  font-weight: bold;
+  color: #1e3a5f;
+  margin-top: 3mm;
+  margin-bottom: 1mm;
+  padding-left: 3mm;
+  position: relative;
+  page-break-after: avoid;
+}
+
+h4::before {
+  content: "■";
+  color: #b45309;
+  position: absolute;
+  left: 0;
+  font-size: 0.85em;
+}
+
+/* ─────────────────────────────────────────
+   本文
+   ───────────────────────────────────────── */
+p {
+  margin-bottom: 2.5mm;
+  text-align: justify;
+  text-justify: inter-ideograph;
+  color: #1a1a1a;
+}
+
+strong {
+  font-weight: bold;
+  color: #0f2744;
+}
+
+em {
+  font-style: normal;
+  color: #b45309;
+  font-weight: 500;
+}
+
+a {
+  color: #1e3a5f;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ─────────────────────────────────────────
+   リスト
+   ───────────────────────────────────────── */
+ul, ol {
+  margin-left: 4mm;
+  padding-left: 4mm;
+  margin-bottom: 2mm;
+}
+
+ul li::marker {
+  color: #1e3a5f;
+  font-weight: bold;
+}
+
+ol li::marker {
+  color: #1e3a5f;
+  font-weight: bold;
+}
+
+li {
+  margin-bottom: 1.2mm;
+  color: #1a1a1a;
+  line-height: 1.85;
+}
+
+li > ul, li > ol {
+  margin-top: 0.5mm;
+  margin-bottom: 0.5mm;
+}
+
+/* ─────────────────────────────────────────
+   引用ブロック (カード化)
+   ───────────────────────────────────────── */
+blockquote {
+  background: #f1f5f9;
+  border-left: 4px solid #b45309;
+  padding: 2.5mm 4mm;
+  margin: 3mm 0;
+  border-radius: 0 2mm 2mm 0;
+  color: #1a1a1a;
+  page-break-inside: avoid;
+}
+
+blockquote p {
+  margin-bottom: 1mm;
+}
+
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+blockquote strong:first-child {
+  color: #b45309;
+  display: inline-block;
+  margin-right: 1mm;
+}
+
+/* ─────────────────────────────────────────
+   テーブル
+   ───────────────────────────────────────── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 3mm 0;
+  font-size: calc({{FONT_SIZE}} - 0.5pt);
+  border-top: 2px solid #1e3a5f;
+  border-bottom: 2px solid #1e3a5f;
+  page-break-inside: avoid;
+}
+
+table th {
+  background: #e2e8f0;
+  color: #0f2744;
+  font-weight: bold;
+  text-align: left;
+  padding: 2mm 3mm;
+  border-bottom: 1px solid #1e3a5f;
+  white-space: nowrap;
+}
+
+table td {
+  padding: 1.8mm 3mm;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+  color: #1a1a1a;
+}
+
+table tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ─────────────────────────────────────────
+   水平線
+   ───────────────────────────────────────── */
+hr {
+  border: none;
+  border-top: 1px solid #cbd5e1;
+  margin: 4mm 0;
+  position: relative;
+}
+
+hr::after {
+  content: "◆";
+  position: absolute;
+  top: -0.55em;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  color: #b45309;
+  padding: 0 2mm;
+  font-size: 0.7em;
+}
+
+/* ─────────────────────────────────────────
+   コードブロック
+   ───────────────────────────────────────── */
+code {
+  font-family: 'Menlo', 'Consolas', 'SFMono-Regular', monospace;
+  background: #f1f5f9;
+  color: #0f2744;
+  padding: 0.3mm 1.2mm;
+  border-radius: 1mm;
+  font-size: 0.88em;
+  border: 1px solid #e2e8f0;
+}
+
+pre {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-left: 3px solid #1e3a5f;
+  padding: 2.5mm 3mm;
+  border-radius: 1mm;
+  margin: 3mm 0;
+  overflow-x: auto;
+  font-size: 0.85em;
+  page-break-inside: avoid;
+}
+
+pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #1a1a1a;
+}
+
+/* ─────────────────────────────────────────
+   表紙（graphical: A4縦・深紺グラデ・琥珀アクセント）
+   ───────────────────────────────────────── */
+.cover-page {
+  min-height: 260mm;
+  padding: 40mm 15mm 20mm;
+  page-break-after: always;
+  background: linear-gradient(160deg, #0f2744 0%, #1e3a5f 55%, #2a4a73 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-page .cover-inner {
+  width: 100%;
+  text-align: center;
+}
+
+.cover-page .cover-title {
+  font-size: 30pt;
+  font-weight: bold;
+  color: #fff;
+  letter-spacing: 3pt;
+  border: none;
+  padding: 0;
+  margin-bottom: 8mm;
+  text-align: center;
+  background: none;
+}
+
+.cover-page .cover-subtitle {
+  font-size: 14pt;
+  color: #fbbf24;
+  font-weight: normal;
+  margin-bottom: 40mm;
+  border: none;
+  padding: 0;
+  text-align: center;
+  background: none;
+}
+
+.cover-page .cover-spacer {
+  height: 20mm;
+}
+
+.cover-page .cover-author,
+.cover-page .cover-date {
+  font-size: 12pt;
+  color: #e2e8f0;
+  margin-bottom: 2mm;
+  text-align: center;
+}
