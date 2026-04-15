@@ -7,6 +7,8 @@
 
 日本語 Markdown を A4 PDF に変換する、AI コーディングツール向けのローカル skill。
 
+**こんな人向け**: AI コーディングツール（Claude Code / Copilot CLI / Cursor / Codex CLI）で、日本語の履歴書・提案書・請求書・レポートを納品品質の PDF にしたい人。LaTeX も Chrome もいらない。
+
 **weasyprint + BIZ UDPGothic + Noto Sans CJK JP** で動くので、sandbox でも root 権限なしで日本語 PDF が出せる。履歴書・職務経歴書・提案書・note 記事・顧客向け資料・請求書・レポート・スライドなど、日本語ドキュメントの PDF 化をワンコマンドで済ませるのが目的。
 
 ## これは何？
@@ -20,14 +22,15 @@
 - 日本語フォントは BIZ UDPGothic（推奨）と Noto Sans CJK JP を内蔵
 - 必要なら `scripts/convert.py` を CLI から直接実行できる
 
-## 他のツールとの違い
+## Quick Start
 
-| ツール | 得意 | 特徴・制約 |
-|---|---|---|
-| Eisvogel (Pandoc + LaTeX) | 美しい汎用 PDF | LaTeX + texlive 必須（数GB）・セットアップが重い |
-| Marp / Slidev / reveal.js | スライドプレゼン体験 | 履歴書・提案書・請求書には向かない |
-| md-to-pdf | 汎用 CLI・CSS 自由 | headless Chrome 必須・日本語設定はユーザー任せ |
-| **jp-md-to-pdf** | **日本語 A4 業務文書を AI tool から即 PDF** | **Chrome / LaTeX 不要・フォント自動・preset 即用** |
+```bash
+git clone https://github.com/yoshi-ai-mentor/jp-md-to-pdf
+cd jp-md-to-pdf && bash scripts/setup_fonts.sh
+python3 scripts/convert.py -i your-doc.md -o output.pdf --preset resume
+```
+
+3行で完了。プリセットは `resume` `proposal` `report` `slide` 等 8種。詳細は[使い方](#使い方)を参照。
 
 ## こんなのが作れる
 
