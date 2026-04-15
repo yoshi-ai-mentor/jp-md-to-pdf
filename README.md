@@ -20,6 +20,15 @@
 - 日本語フォントは BIZ UDPGothic（推奨）と Noto Sans CJK JP を内蔵
 - 必要なら `scripts/convert.py` を CLI から直接実行できる
 
+## 他のツールとの違い
+
+| ツール | 得意 | 特徴・制約 |
+|---|---|---|
+| Eisvogel (Pandoc + LaTeX) | 美しい汎用 PDF | LaTeX + texlive 必須（数GB）・セットアップが重い |
+| Marp / Slidev / reveal.js | スライドプレゼン体験 | 履歴書・提案書・請求書には向かない |
+| md-to-pdf | 汎用 CLI・CSS 自由 | headless Chrome 必須・日本語設定はユーザー任せ |
+| **jp-md-to-pdf** | **日本語 A4 業務文書を AI tool から即 PDF** | **Chrome / LaTeX 不要・フォント自動・preset 即用** |
+
 ## こんなのが作れる
 
 すべて `samples/` 配下の Markdown から生成した実物。ワンコマンドでここまで仕上がる。
