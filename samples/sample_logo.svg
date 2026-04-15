@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="80" viewBox="0 0 200 80" role="img" aria-label="Sample logo">
+  <rect width="200" height="80" fill="#ffffff" rx="6" stroke="#cccccc" stroke-width="1"/>
+  <circle cx="40" cy="40" r="24" fill="#2563eb"/>
+  <text x="40" y="47" font-family="sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">S</text>
+  <text x="120" y="48" font-family="sans-serif" font-size="18" font-weight="bold" fill="#1e293b" text-anchor="middle">SampleCo</text>
+</svg>

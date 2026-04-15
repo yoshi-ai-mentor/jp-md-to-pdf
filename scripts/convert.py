@@ -11,6 +11,7 @@ Usage:
 フォント: Noto Sans CJK JP (setup_fonts.sh で事前導入)
 """
 import argparse
+import base64
 import html as html_module
 import http.client
 import ipaddress
@@ -40,9 +41,12 @@ DISALLOWED_FONT_CHARS = set(';:{}[]()<>@/\\\n\r\t')
 MAX_INPUT_BYTES = 2 * 1024 * 1024
 MAX_CUSTOM_CSS_BYTES = 256 * 1024
 MAX_FETCH_COUNT = 64
-MAX_DATA_URL_CHARS = 1024 * 1024
+# data: URL 全体の上限（表紙ロゴを 2MB まで許すと base64 で約 2.8MB になる）
+MAX_DATA_URL_CHARS = 3 * 1024 * 1024
 MAX_FETCHED_RESOURCE_BYTES = 5 * 1024 * 1024
 MAX_HTTP_REDIRECTS = 3
+MAX_COVER_LOGO_BYTES = 2 * 1024 * 1024
+COVER_LOGO_ALLOWED_SUFFIXES = frozenset({'.png', '.jpg', '.jpeg', '.svg', '.gif'})
 
 
 # フォントプリセット: --font フラグに対応する font-family CSS 文字列
@@ -124,6 +128,47 @@ def validate_font_arg(font_arg: str) -> str:
     if any(ch in DISALLOWED_FONT_CHARS for ch in normalized):
         raise ValueError('--font に危険な文字が含まれている')
     return normalized
+
+
+def _mime_type_for_logo(path: Path) -> str:
+    """Return MIME for embedded cover logo (validated extension only)."""
+    suffix = path.suffix.lower()
+    mapping = {
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml',
+    }
+    return mapping[suffix]
+
+
+def validate_logo_path(logo_path: Optional[str]) -> Optional[str]:
+    """Only allow local image files (png/jpg/jpeg/svg/gif), max 2MB. URLs are rejected."""
+    if logo_path is None:
+        return None
+    raw = logo_path.strip()
+    if not raw:
+        raise ValueError('--cover-logo が空です')
+    lower = raw.lower()
+    if lower.startswith(('http://', 'https://', 'file://', 'data:')) or raw.startswith('//') or '://' in raw:
+        raise ValueError('--cover-logo はローカルファイルパスだけ指定できる（URLは不可）')
+    candidate = Path(raw).expanduser()
+    if not candidate.exists():
+        raise ValueError(f'--cover-logo のファイルが見つからない: {logo_path}')
+    if not candidate.is_file():
+        raise ValueError(f'--cover-logo は通常ファイルを指定してほしい: {logo_path}')
+    suffix = candidate.suffix.lower()
+    if suffix not in COVER_LOGO_ALLOWED_SUFFIXES:
+        raise ValueError(
+            '--cover-logo は .png / .jpg / .jpeg / .svg / .gif のいずれかにしてほしい'
+        )
+    size = candidate.stat().st_size
+    if size > MAX_COVER_LOGO_BYTES:
+        raise ValueError('--cover-logo は 2MB 以下にしてほしい')
+    if size == 0:
+        raise ValueError('--cover-logo が空のファイルです')
+    return str(candidate.resolve())
 
 
 def validate_css_path(css_path: Optional[str]) -> Optional[str]:
@@ -322,7 +367,10 @@ def build_safe_url_fetcher(allow_http: bool, allow_local: bool, allowed_local_ro
                 http_headers=http_headers,
             )
         elif scheme in ('data', 'about'):
-            result = url_fetcher(
+            # data: URI は MAX_DATA_URL_CHARS で入口制限済み。
+            # WeasyPrint 68+ は URLFetcherResponse を返すため、
+            # dict 前提のサイズチェックは通さずそのまま返す。
+            return url_fetcher(
                 url,
                 timeout=timeout,
                 ssl_context=ssl_context,
@@ -331,15 +379,21 @@ def build_safe_url_fetcher(allow_http: bool, allow_local: bool, allowed_local_ro
         else:
             raise ValueError(f'未対応のURLスキームを検出: {scheme or "(relative)"}')
 
-        if result.get('string') is not None and len(result['string']) > MAX_FETCHED_RESOURCE_BYTES:
+        # WeasyPrint 68+ の URLFetcherResponse 対応:
+        # dict ではなくオブジェクトなので getattr で安全にアクセス
+        resp_string = getattr(result, 'string', None) if not isinstance(result, dict) else result.get('string')
+        resp_file_obj = getattr(result, 'file_obj', None) if not isinstance(result, dict) else result.get('file_obj')
+
+        if resp_string is not None and len(resp_string) > MAX_FETCHED_RESOURCE_BYTES:
             raise ValueError('取得リソースが大きすぎる')
-        if result.get('file_obj') is not None:
-            data = result['file_obj'].read(MAX_FETCHED_RESOURCE_BYTES + 1)
-            result['file_obj'].close()
+        if resp_file_obj is not None:
+            data = resp_file_obj.read(MAX_FETCHED_RESOURCE_BYTES + 1)
+            resp_file_obj.close()
             if len(data) > MAX_FETCHED_RESOURCE_BYTES:
                 raise ValueError('取得リソースが大きすぎる')
-            result.pop('file_obj', None)
-            result['string'] = data
+            if isinstance(result, dict):
+                result.pop('file_obj', None)
+                result['string'] = data
         return result
 
     return safe_url_fetcher
@@ -452,8 +506,11 @@ def resolve_font_family(font_arg: str) -> str:
 
 def build_cover_html(cover_title: str, cover_subtitle: str = None,
                      cover_author: str = None, cover_date: str = None,
-                     style: str = 'plain') -> str:
-    """表紙ブロックのHTMLを生成する。style=slide の場合は横向き用クラスを付与。"""
+                     style: str = 'plain', cover_logo: Optional[str] = None) -> str:
+    """表紙ブロックのHTMLを生成する。style=slide の場合は横向き用クラスを付与。
+
+    cover_logo: validate_logo_path 済みのローカルパス。base64 data URI で表紙先頭に埋め込む。
+    """
     import datetime
 
     # cover_date が空文字列なら今日の日付を自動挿入（None のときは非表示）
@@ -463,7 +520,17 @@ def build_cover_html(cover_title: str, cover_subtitle: str = None,
     cls = 'cover-page cover-slide' if style == 'slide' else 'cover-page'
     parts = [f'<div class="{cls}">']
     parts.append('<div class="cover-inner">')
-    parts.append(f'<h1 class="cover-title">{html_module.escape(cover_title)}</h1>')
+    if cover_logo:
+        logo_path = Path(cover_logo)
+        payload = logo_path.read_bytes()
+        mime = _mime_type_for_logo(logo_path)
+        b64 = base64.b64encode(payload).decode('ascii')
+        data_uri = f'data:{mime};base64,{b64}'
+        parts.append(
+            f'<img class="cover-logo" src="{data_uri}" alt="" />'
+        )
+    if cover_title:
+        parts.append(f'<h1 class="cover-title">{html_module.escape(cover_title)}</h1>')
     if cover_subtitle:
         parts.append(f'<p class="cover-subtitle">{html_module.escape(cover_subtitle)}</p>')
     parts.append('<div class="cover-spacer"></div>')
@@ -479,7 +546,8 @@ def build_cover_html(cover_title: str, cover_subtitle: str = None,
 def build_html(md_content: str, css_content: str, page_breaks=None, title: str = "",
                style: str = 'plain',
                cover_title: str = None, cover_subtitle: str = None,
-               cover_author: str = None, cover_date: str = None) -> str:
+               cover_author: str = None, cover_date: str = None,
+               cover_logo: Optional[str] = None) -> str:
     """Markdown 本文と CSS を組み合わせて HTML 文書を作る。
 
     style='slide' の場合:
@@ -506,15 +574,16 @@ def build_html(md_content: str, css_content: str, page_breaks=None, title: str =
         '<div class="page-break"></div>',
     )
 
-    # 表紙ブロック
+    # 表紙ブロック（タイトルまたはロゴのどちらかがあれば生成）
     cover_html = ''
-    if cover_title:
+    if cover_title or cover_logo:
         cover_html = build_cover_html(
-            cover_title=cover_title,
+            cover_title=cover_title or '',
             cover_subtitle=cover_subtitle,
             cover_author=cover_author,
             cover_date=cover_date,
             style=style,
+            cover_logo=cover_logo,
         )
 
     body_class = 'slide-mode' if style == 'slide' else 'doc-mode'
@@ -731,6 +800,7 @@ def generate_pdf(
     cover_subtitle: str = None,
     cover_author: str = None,
     cover_date: str = None,
+    cover_logo: str = None,
     allow_http: bool = False,
     allow_local: bool = False,
 ) -> int:
@@ -756,6 +826,7 @@ def generate_pdf(
         page_breaks=page_breaks, title=title, style=style,
         cover_title=cover_title, cover_subtitle=cover_subtitle,
         cover_author=cover_author, cover_date=cover_date,
+        cover_logo=cover_logo,
     )
 
     font_config = FontConfiguration()
@@ -844,6 +915,8 @@ def main():
     parser.add_argument('--cover-subtitle', default=None, help='表紙のサブタイトル')
     parser.add_argument('--cover-author', default=None, help='表紙の著者名')
     parser.add_argument('--cover-date', default=None, help='表紙の日付（空文字なら今日の日付を自動挿入）')
+    parser.add_argument('--cover-logo', default=None,
+                        help='表紙先頭に載せるロゴ画像（ローカルパスのみ。png/jpg/jpeg/svg/gif、2MB以下。URL不可）')
     args = parser.parse_args()
 
     # --list-presets は最優先で処理して終了
@@ -874,6 +947,7 @@ def main():
         args.cover_subtitle = validate_text_option('--cover-subtitle', args.cover_subtitle)
         args.cover_author = validate_text_option('--cover-author', args.cover_author)
         args.cover_date = validate_text_option('--cover-date', args.cover_date)
+        args.cover_logo = validate_logo_path(args.cover_logo)
     except ValueError as e:
         print(f'エラー: {e}', file=sys.stderr)
         sys.exit(1)
@@ -908,6 +982,7 @@ def main():
             cover_subtitle=args.cover_subtitle,
             cover_author=args.cover_author,
             cover_date=args.cover_date,
+            cover_logo=args.cover_logo,
             allow_http=args.allow_http,
             allow_local=args.allow_local,
         )

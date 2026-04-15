@@ -6,8 +6,8 @@
   },
   "resume": {
     "description": "履歴書・職務経歴書（詰めて1-2枚に収めるスタイル）",
-    "margin": "5mm 4mm",
-    "font_size": "9pt",
+    "margin": "12mm 10mm",
+    "font_size": "9.5pt",
     "font": "biz-ud",
     "style": "plain"
   },

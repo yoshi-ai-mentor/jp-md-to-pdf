@@ -1,6 +1,6 @@
 ---
 name: jp-md-to-pdf
-description: 日本語 Markdown を A4 PDF に変換する。履歴書・職務経歴書・提案書・note 記事・顧客向け資料・請求書・レポート・スライド/デッキなど、**日本語ドキュメントの PDF 化を頼まれたら必ずこのスキルを使う**。「この MD を PDF にして」「職務経歴書 PDF」「提案書を PDF で」「日本語の資料を PDF にしたい」「A4 で出力」「A4 横でスライドを PDF に」「デッキを PDF 化」「表紙付きで PDF」「カバーページを付けて PDF」などの依頼が来たら発動すること。ユーザーが明示的に「PDF」と言わなくても、印刷や納品・配布を前提とした日本語ドキュメント（履歴書・提案書・スライド資料・請求書など）を整形する文脈であれば積極的に使う。weasyprint + BIZ UDPGothic / Noto Sans CJK JP で動くので sandbox でも root 権限なしで日本語 PDF が出せるのが強み。プリセット（resume/proposal/report/note-article/invoice/minimal/slide）、表紙自動生成（--cover-*）、A4横スライドモード（--style slide）に対応。
+description: 日本語 Markdown を A4 PDF に変換する。履歴書・職務経歴書・提案書・note 記事・顧客向け資料・請求書・レポート・スライド/デッキなど、**日本語ドキュメントの PDF 化を頼まれたら必ずこのスキルを使う**。「この MD を PDF にして」「職務経歴書 PDF」「提案書を PDF で」「日本語の資料を PDF にしたい」「A4 で出力」「A4 横でスライドを PDF に」「デッキを PDF 化」「表紙付きで PDF」「カバーページを付けて PDF」「表紙にロゴを載せて PDF」などの依頼が来たら発動すること。ユーザーが明示的に「PDF」と言わなくても、印刷や納品・配布を前提とした日本語ドキュメント（履歴書・提案書・スライド資料・請求書など）を整形する文脈であれば積極的に使う。weasyprint + BIZ UDPGothic / Noto Sans CJK JP で動くので sandbox でも root 権限なしで日本語 PDF が出せるのが強み。プリセット（resume/proposal/report/note-article/invoice/minimal/slide）、表紙自動生成（--cover-* と --cover-logo）、A4横スライドモード（--style slide）に対応。
 ---
 
 # jp-md-to-pdf
@@ -72,6 +72,7 @@ python3 <skill_path>/scripts/convert.py \
 | `--cover-subtitle "..."` | なし | 表紙のサブタイトル |
 | `--cover-author "..."` | なし | 表紙の著者・発行元名 |
 | `--cover-date "..."` | なし | 表紙の日付。空文字列 `""` を渡すと今日の日付を自動挿入 |
+| `--cover-logo path` | なし | 表紙の**最上部**（タイトルより上）にロゴ画像を載せる。**ローカルファイルパスだけ**（`.png` / `.jpg` / `.jpeg` / `.svg` / `.gif`、**2MB 以下**）。`http(s)` や `data:` などの **URL 形式は不可**。PDF には base64 の data URI で埋め込むので **`--allow-local` は不要** |
 
 ### プリセット (--preset)
 
@@ -79,7 +80,7 @@ python3 <skill_path>/scripts/convert.py \
 
 | プリセット | margin | font-size | style | 用途 |
 |---|---|---|---|---|
-| `resume` | 5mm 4mm | 9pt | plain | 履歴書・職務経歴書（1-2枚に収める詰めスタイル）|
+| `resume` | 12mm 10mm | 9.5pt | plain | 履歴書・職務経歴書（1-2枚に収める。余白は読みやすさ重視に調整済み）|
 | `proposal` | 18mm 16mm | 10.5pt | graphical | 顧客向け提案書（カラーアクセント）|
 | `report` | 18mm 16mm | 10.5pt | graphical | 分析レポート・調査資料 |
 | `note-article` | 20mm 20mm | 11pt | plain | note記事のプリント版（ゆったり読み物）|
@@ -107,7 +108,25 @@ A4横向きで、Markdown の `---` (水平線) を改ページとして扱う�
 
 ### 表紙生成 (--cover-*)
 
-`--cover-title` を指定すると、本文の前に表紙ページを1枚挿入する。style によって装飾が変わる（plain: シンプル / graphical: 深紺グラデ / slide: 横向きグラデ）。
+`--cover-title` または `--cover-logo` のどちらかを指定すると、本文の前に表紙ページを1枚挿入する（**ロゴだけ**の表紙も可）。style によって装飾が変わる（plain: シンプル / graphical: 深紺グラデ / slide: 横向きグラデ）。
+
+**`--cover-logo` の使い方**
+
+- 会社ロゴ・製品アイコンなど、**信頼できるローカル画像**へのパスを渡す。表紙ブロック内ではタイトル文言より**上**・中央寄せ（CSS: `.cover-logo`、最大高さおおむね 80px / 最大幅 200px 目安）
+- 拡張子とサイズは `validate_logo_path` で検証される。本文 Markdown 内の `![](logo.png)` とは別。**本文から画像を読むときは従来どおり `--allow-local` が必要**な場合がある
+
+例（提案書プリセット + 表紙テキスト + ロゴ）:
+
+```bash
+python3 <skill_path>/scripts/convert.py \
+  -i proposal.md -o proposal.pdf \
+  --preset proposal \
+  --cover-logo /path/to/logo.png \
+  --cover-title "業務フロー改善提案書" \
+  --cover-subtitle "経費精算フローの再設計" \
+  --cover-author "株式会社〇〇" \
+  --cover-date ""
+```
 
 ### スタイルプリセット (--style)
 
@@ -137,7 +156,7 @@ A4横向きで、Markdown の `---` (水平線) を改ページとして扱う�
 
 | 用途 | margin | font-size | 備考 |
 |---|---|---|---|
-| 履歴書（1ページ厳守） | `5mm 4mm` | `9pt` | 職歴が多いなら 2 ページ許容に切替 |
+| 履歴書（1ページ厳守） | `12mm 10mm`（`--preset resume`） | `9.5pt` | さらに詰めるなら `--margin` / `--font-size` で上書き |
 | 職務経歴書 | `6mm 4.5mm` | `8.5pt` | 3〜4 ページ前提 |
 | 提案書・レポート | `15mm 12mm` | `10.5pt` | 読みやすさ優先 |
 | note 記事・ブログ | `18mm 15mm` | `11pt` | 長文用。行間ゆったり |
@@ -181,6 +200,7 @@ python3 convert.py -i doc.md -o doc.pdf \
 - raw HTML は既定でエスケープされる
 - 外部 URL フェッチは既定で無効。必要時のみ `--allow-http`（localhost / private network 宛ては許可しない）
 - ローカルファイル参照は既定で無効。必要時のみ `--allow-local`（入力 Markdown と custom CSS のディレクトリ配下だけ許可）
+- `--cover-logo` は表紙用ロゴ専用のパス検証で読み込み、上記 `--allow-local` とは別（ローカル画像パスを直接渡す想定）
 - `--css` はローカルの `.css` ファイルだけ許可
 - 信頼できない Markdown / HTML / CSS を変換する用途は推奨しない
 

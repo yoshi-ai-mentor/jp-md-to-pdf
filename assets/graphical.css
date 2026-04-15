@@ -338,6 +338,14 @@ pre code {
   text-align: center;
 }
 
+.cover-page .cover-logo {
+  display: block;
+  margin: 0 auto 6mm;
+  max-height: 80px;
+  max-width: 200px;
+  object-fit: contain;
+}
+
 .cover-page .cover-title {
   font-size: 30pt;
   font-weight: bold;

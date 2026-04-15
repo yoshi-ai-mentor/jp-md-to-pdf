@@ -199,6 +199,14 @@ table tr:nth-child(even) td {
   max-width: 100%;
 }
 
+.cover-page.cover-slide .cover-logo {
+  display: block;
+  margin: 0 auto 6mm;
+  max-height: 80px;
+  max-width: 200px;
+  object-fit: contain;
+}
+
 .cover-page.cover-slide .cover-title {
   font-size: 40pt;
   font-weight: bold;

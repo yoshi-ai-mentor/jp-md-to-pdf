@@ -26,13 +26,13 @@
 
 ### 1. 履歴書プリセット（`--preset resume`）
 
-5mm 余白 + 9pt で詰め込んだ1枚完結レイアウト。職務経歴書の「ページ数増やしたくない」問題を解決。
+**12mm 10mm** 余白 + **9.5pt** で読みやすさと枚数のバランスを取ったレイアウト。職務経歴書の「ページ数増やしたくない」問題を解決。
 
 ![履歴書サンプル](docs/images/01_resume.png)
 
 ### 2. 提案書プリセット（`--preset proposal` + 表紙）
 
-ネイビー × アンバーのカラーアクセントで顧客向けフォーマル。表紙は `--cover-*` オプションで自動生成。
+ネイビー × アンバーのカラーアクセントで顧客向けフォーマル。表紙は `--cover-*` オプションで自動生成。ロゴ画像は `--cover-logo` に **ローカルファイルパス**（png / jpg / jpeg / svg / gif、2MB 以下。URL は不可）を渡す。
 
 | 表紙 | 本文 |
 |---|---|
@@ -113,6 +113,12 @@ python3 scripts/convert.py -i proposal.md -o proposal.pdf \
   --cover-author "株式会社〇〇" \
   --cover-date ""
 
+# 表紙にロゴを載せる（タイトル行の上・中央。ローカルパスのみ）
+python3 scripts/convert.py -i proposal.md -o proposal.pdf \
+  --preset proposal \
+  --cover-logo samples/sample_logo.svg \
+  --cover-title "業務フロー改善提案書"
+
 # A4横スライド
 python3 scripts/convert.py -i deck.md -o deck.pdf --preset slide \
   --cover-title "AIコーディングツール導入ガイド"
@@ -165,7 +171,8 @@ python3 scripts/convert.py -i samples/03_slide_sample.md -o samples/output/03_sl
 - raw HTML は既定でエスケープされる
 - 外部 URL フェッチは既定で無効（必要なときだけ `--allow-http`。localhost / private network 宛ては許可しない）
 - ローカルファイル参照は既定で無効（必要なときだけ `--allow-local`。入力 Markdown と custom CSS のディレクトリ配下だけ許可）
-- 画像やローカル CSS を参照する Markdown を使う場合は、入力ファイルと同じ作業ディレクトリ配下に必要な素材を置いて変換する
+- **`--cover-logo` は上記とは別経路**。指定したローカル画像だけを表紙用に読み込み、PDF 内は base64 の data URI として埋め込む（`--allow-local` 不要）
+- 画像やローカル CSS を本文 Markdown から参照する場合は、入力ファイルと同じ作業ディレクトリ配下に必要な素材を置き、`--allow-local` で許可する
 
 ## トラブルシューティング
 

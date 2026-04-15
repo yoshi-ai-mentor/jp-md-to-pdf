@@ -71,6 +71,63 @@ def test_validate_css_path_requires_local_css_file(tmp_path):
         convert.validate_css_path(str(tmp_path / 'custom.txt'))
 
 
+def test_validate_logo_path_none():
+    assert convert.validate_logo_path(None) is None
+
+
+def test_validate_logo_path_accepts_png_jpg_svg_gif(tmp_path):
+    for name in ('a.png', 'b.jpg', 'c.jpeg', 'd.svg', 'e.gif'):
+        p = tmp_path / name
+        p.write_bytes(b'x')
+        assert convert.validate_logo_path(str(p)) == str(p.resolve())
+
+
+def test_validate_logo_path_rejects_missing_file(tmp_path):
+    missing = tmp_path / 'nope.png'
+
+    with pytest.raises(ValueError, match='見つからない'):
+        convert.validate_logo_path(str(missing))
+
+
+def test_validate_logo_path_rejects_bad_extension(tmp_path):
+    p = tmp_path / 'logo.webp'
+    p.write_bytes(b'x')
+
+    with pytest.raises(ValueError, match='png'):
+        convert.validate_logo_path(str(p))
+
+
+def test_validate_logo_path_rejects_oversized_file(tmp_path):
+    p = tmp_path / 'big.png'
+    p.write_bytes(b'x' * (convert.MAX_COVER_LOGO_BYTES + 1))
+
+    with pytest.raises(ValueError, match='2MB'):
+        convert.validate_logo_path(str(p))
+
+
+@pytest.mark.parametrize(
+    'bad',
+    ['https://example.com/x.png', 'http://a/x.png', 'file:///tmp/x.png', 'data:image/png;base64,QQ==', '//evil/x.png'],
+)
+def test_validate_logo_path_rejects_urls(bad):
+    with pytest.raises(ValueError, match='ローカルファイル'):
+        convert.validate_logo_path(bad)
+
+
+def test_build_cover_html_inserts_base64_logo(tmp_path):
+    svg = tmp_path / 'logo.svg'
+    svg.write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1"/></svg>',
+        encoding='utf-8',
+    )
+    resolved = convert.validate_logo_path(str(svg))
+    html = convert.build_cover_html(cover_title='T', cover_logo=resolved)
+
+    assert 'class="cover-logo"' in html
+    assert 'data:image/svg+xml;base64,' in html
+    assert html.index('cover-logo') < html.index('cover-title')
+
+
 def test_validate_css_path_rejects_oversized_file(tmp_path):
     css_file = tmp_path / 'huge.css'
     css_file.write_text('a' * (convert.MAX_CUSTOM_CSS_BYTES + 1), encoding='utf-8')

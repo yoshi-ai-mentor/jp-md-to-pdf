@@ -5,6 +5,17 @@ All notable changes to **jp-md-to-pdf** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/ja/).
 
+## [1.2.0] - 2026-04-15
+
+### Added
+
+- **`--cover-logo PATH`**: 表紙ブロックの先頭（タイトルより上）にロゴ画像を表示。ローカルファイルのみ（`.png` / `.jpg` / `.jpeg` / `.svg` / `.gif`、最大 2MB）。URL・`data:` スキームは拒否。PDF 内は base64 data URI で埋め込み（`--allow-local` 不要）
+- **`samples/sample_logo.svg`**: 表紙ロゴの動作確認用サンプル
+
+### Changed
+
+- **`resume` プリセット**（`assets/presets.json`）: 余白を `5mm 4mm` → **`12mm 10mm`**、フォントサイズを `9pt` → **`9.5pt`** に変更（読みやすさと印刷余白のバランス優先）
+
 ## [1.1.0] - 2026-04-15
 
 公開前のセキュリティ hardening。
