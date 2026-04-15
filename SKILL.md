@@ -1,5 +1,11 @@
 ---
 name: jp-md-to-pdf
+license: MIT
+compatibility:
+  - claude-code
+  - copilot-cli
+  - cursor
+  - codex-cli
 description: 日本語 Markdown を A4 PDF に変換する。履歴書・職務経歴書・提案書・note 記事・顧客向け資料・請求書・レポート・スライド/デッキなど、**日本語ドキュメントの PDF 化を頼まれたら必ずこのスキルを使う**。「この MD を PDF にして」「職務経歴書 PDF」「提案書を PDF で」「日本語の資料を PDF にしたい」「A4 で出力」「A4 横でスライドを PDF に」「16:9 スライドを PDF」「デッキを PDF 化」「表紙付きで PDF」「カバーページを付けて PDF」「表紙にロゴを載せて PDF」などの依頼が来たら発動すること。ユーザーが明示的に「PDF」と言わなくても、印刷や納品・配布を前提とした日本語ドキュメント（履歴書・提案書・スライド資料・請求書など）を整形する文脈であれば積極的に使う。weasyprint + BIZ UDPGothic / Noto Sans CJK JP で動くので sandbox でも root 権限なしで日本語 PDF が出せるのが強み。プリセット（resume/proposal/report/note-article/invoice/minimal/slide/slide-16x9）、表紙自動生成（--cover-* と --cover-logo）、スライドモード（--style slide・`--page-size` で用紙サイズ指定可）に対応。
 ---
 
