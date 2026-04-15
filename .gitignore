@@ -36,6 +36,9 @@ assets/fonts/*.ttc
 # Claude Code / Cowork の内部キャッシュ
 .claude-cache/
 
+# oreo 内部ファイル（機械固有パスを含むため公開禁止）
+.oreo/
+
 # 配布時に含めないサンプル中間ファイル
 samples/output/
 samples/tmp/
